@@ -17,9 +17,9 @@ void InputCaptureConfiguration(void) {
     LED1port->DIR |= LED1Pin; //output pin
     LED1port->SEL0 &=~LED1Pin;
     LED1port->SEL1 &=~LED1Pin;
-    LED1port->OUT |= LED1Pin; //turn LED on
-    for(delaycount=0; delaycount<DELAYTIME; delaycount++);
-    LED1port->OUT &= ~LED1Pin; //turn LED off
+//    LED1port->OUT |= LED1Pin; //turn LED on
+//    for(delaycount=0; delaycount<DELAYTIME; delaycount++);
+//    LED1port->OUT &= ~LED1Pin; //turn LED off
 //trigger pin on HC-SR04 to start eight 40kHz burst
     InputCaptureTriggerPort->DIR |= InputCaptureTrigger; //output pin
     InputCaptureTriggerPort->SEL0 &=~InputCaptureTrigger;

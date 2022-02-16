@@ -63,7 +63,8 @@ int main(void)
         printf("\r\n object distance in %4.1f (cm)  pulse width %4.1f (us)", ObjectDistance, PulseWidth);
         if(ObjectDistance<THRESHOLD)   LED1port->OUT |= LED1Pin; //turn on LED1
         else   LED1port->OUT &= ~LED1Pin;
-        for(count=0; count<2000000;count++);
+        //Delay times allow for approximately 2 measurements of distance for when someone walks by it
+        for(count=0; count<500000;count++);
     }; //end while(1)
 } //end main()
 
