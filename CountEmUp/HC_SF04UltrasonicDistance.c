@@ -47,7 +47,7 @@ int main(void)
     //Set SMCLK at 48 MHz
     //Set ACLK at 128kHz
     configHFXT();
-//    configLFXT();
+    configLFXT();
     InputCaptureConfiguration();
 
     while(1){
@@ -83,7 +83,7 @@ float period_measured;
     LED1port->OUT ^= LED1Pin; //toggle LED1
 //capture on rising edge first by default
 //clear capture flag, i.e., interrupt flag CCIFG
-//    TIMER_A0->CCTL[1]&=~TIMER_A_CCTLN_CCIFG;
+    TIMER_A0->CCTL[1]&=~TIMER_A_CCTLN_CCIFG;
 //    TIMER_A0->CCTL[1]=(TIMER_A0->CCTL[1])&0xFFFE;
 
 //first capture, wait for capture to occur when bit 0 CCIFG=1

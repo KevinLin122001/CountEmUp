@@ -14,4 +14,4 @@
 #define LED1port P1
 #define LED1Pin BIT0
 
-
+void InputCaptureConfiguration(void);

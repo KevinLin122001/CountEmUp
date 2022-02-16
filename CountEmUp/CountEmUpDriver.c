@@ -2,6 +2,8 @@
 
 #define Frequency20Hz 1638
 
+volatile uint16_t distance;
+
 void ConfigureTimerA1(void)
 {
     /* Configure Timer_A1 and CCRs */
@@ -31,4 +33,19 @@ void main(void)
 
 
 
+}
+
+// Timer A1 CCR0 interrupt service routine
+//This interrupt occurs at 20 Hz to update the distance values received from the ultra sonic sensor
+void TA1_0_IRQHandler(void)
+{
+    /* Not necessary to check which flag is set because only one IRQ
+     *  mapped to this interrupt vector     */
+    if (TIMER_A1->CCTL[0] & TIMER_A_CCTLN_CCIFG)
+    {
+        // TODO clear timer compare flag in TA3CCTL0
+        TIMER_A1->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;  //clear interrupt flag
+        StartHC_SF04Reading();
+
+    }
 }
