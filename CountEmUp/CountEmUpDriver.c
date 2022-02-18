@@ -68,8 +68,8 @@ void TA2_0_IRQHandler(void)
         // TODO clear timer compare flag in TA3CCTL0
         TIMER_A2->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;  //clear interrupt flag
         StartHC_SF04Reading();
-        printf("\r\n Sensor 1 %4.1f (cm)", distance[0]);
-        printf("\r\n Sensor 2 %4.1f (cm)", distance[0]);
+        printf("\r\n Sensor 1 %4.1f (cm)  ", distance[0]);
+        printf("\r\n Sensor 2 %4.1f (cm)  ", distance[1]);
 
 
     }
