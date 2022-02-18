@@ -9,11 +9,13 @@
 
 #include <stdbool.h>
 #include <msp.h>
+#include <Math.h>
 #include "HC_SF04InputCapture.h"
 int sentTime[2];
 int recievedTime[2];
-int distance[2];
-bool sendReceiveToggle;
+float distance[2];
+bool sendReceiveToggle = 0;
+#define SOUNDSPEED 34300.0*pow(10,-6) //centimeters per microsecond
 
 void InputCaptureConfiguration(void) {
 #define DELAYTIME 50000
@@ -59,16 +61,16 @@ void StartHC_SF04Reading(void) {
     if(!sendReceiveToggle) {
         sentTime[0] = TIMER_A0->CCR[1];
         sentTime[1] = TIMER_A1->CCR[1];
-        sendRecieveToggle = 1;
+        sendReceiveToggle = 1;
     }
-    if(sendRecieveToggle) {
+    if(sendReceiveToggle) {
         recievedTime[0] = TIMER_A0->CCR[1];
         recievedTime[1] = TIMER_A1->CCR[1];
 
-        distance[0] =  =(float) SOUNDSPEED*(recievedTime[0] - sentTime[0])/2.0;
-        distance[1] =  =(float) SOUNDSPEED*(recievedTime[1] - sentTime[1])/2.0;
+        distance[0] = (float) SOUNDSPEED*(recievedTime[0] - sentTime[0])/2.0;
+        distance[1] = (float) SOUNDSPEED*(recievedTime[1] - sentTime[1])/2.0;
 
-        sendRecieveToggle = 0;
+        sendReceiveToggle = 0;
 
     }
 
