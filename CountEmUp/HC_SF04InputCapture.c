@@ -83,8 +83,8 @@ void InputCaptureConfiguration(void)
 
             TIMER_A0->EX0 = 0b0000000000000101;    //bits2-0=TAIDEX=0b101 x5
 
-            TIMER_A0->CCTL[1]=0b0100000100000000;
             TIMER_A0->CCTL[2]=0b0100000100000000;
+            TIMER_A0->CCTL[3]=0b0100000100000000;
 
 }
 
@@ -96,42 +96,42 @@ void StartHC_SF04Reading(void)
 //    InputCaptureTriggerPort->OUT &= ~InputCaptureTrigger;
     //capture on rising edge first by default
     //clear capture flag, i.e., interrupt flag CCIFG
-    TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG;
     TIMER_A0->CCTL[2] &= ~TIMER_A_CCTLN_CCIFG;
+    TIMER_A0->CCTL[3] &= ~TIMER_A_CCTLN_CCIFG;
 
     //    TIMER_A0->CCTL[1]=(TIMER_A0->CCTL[1])&0xFFFE;
     //first capture, wait for capture to occur when bit 0 CCIFG=1
-    while ((((TIMER_A0->CCTL[1]) & TIMER_A_CCTLN_CCIFG) != TIMER_A_CCTLN_CCIFG)
-            ||(((TIMER_A0->CCTL[2]) & TIMER_A_CCTLN_CCIFG) != TIMER_A_CCTLN_CCIFG))    {
+    while ((((TIMER_A0->CCTL[2]) & TIMER_A_CCTLN_CCIFG) != TIMER_A_CCTLN_CCIFG)
+            ||(((TIMER_A0->CCTL[3]) & TIMER_A_CCTLN_CCIFG) != TIMER_A_CCTLN_CCIFG))    {
     };
     //clear capture flag, i.e., interrupt flag CCIFG
-    TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG;
     TIMER_A0->CCTL[2] &= ~TIMER_A_CCTLN_CCIFG;
+    TIMER_A0->CCTL[3] &= ~TIMER_A_CCTLN_CCIFG;
 
-    sentTime[0] = TIMER_A0->CCR[1];
-    sentTime[1] = TIMER_A0->CCR[2];
+    sentTime[0] = TIMER_A0->CCR[2];
+    sentTime[1] = TIMER_A0->CCR[3];
 
     //set to capture on falling edge by toggling bits 15 and 14
-    TIMER_A0->CCTL[1] = TIMER_A0->CCTL[1] ^ 0b1100000000000000;
     TIMER_A0->CCTL[2] = TIMER_A0->CCTL[2] ^ 0b1100000000000000;
+    TIMER_A0->CCTL[3] = TIMER_A0->CCTL[3] ^ 0b1100000000000000;
 
     //second capture, wait for falling edge capture to occur when bit 0 CCIFG=1
-    while((((TIMER_A0->CCTL[1])&TIMER_A_CCTLN_CCIFG)!=TIMER_A_CCTLN_CCIFG)
-            ||(((TIMER_A0->CCTL[2]) & TIMER_A_CCTLN_CCIFG) != TIMER_A_CCTLN_CCIFG)){};
+    while((((TIMER_A0->CCTL[2])&TIMER_A_CCTLN_CCIFG)!=TIMER_A_CCTLN_CCIFG)
+            ||(((TIMER_A0->CCTL[3]) & TIMER_A_CCTLN_CCIFG) != TIMER_A_CCTLN_CCIFG)){};
 
     //clear capture flag, i.e., interrupt flag CCIFG
-    TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG;
     TIMER_A0->CCTL[2] &= ~TIMER_A_CCTLN_CCIFG;
+    TIMER_A0->CCTL[3] &= ~TIMER_A_CCTLN_CCIFG;
 
-    recievedTime[0] = TIMER_A0->CCR[1];
-    recievedTime[1] = TIMER_A0->CCR[2];
+    recievedTime[0] = TIMER_A0->CCR[2];
+    recievedTime[1] = TIMER_A0->CCR[3];
 
     distance[0] = (float) SOUNDSPEED
             * ((float) abs(recievedTime[0] - sentTime[0]) / TimerAClock) / 2.0;
     distance[1] = (float) SOUNDSPEED
             * ((float) abs(recievedTime[1] - sentTime[1]) / TimerAClock) / 2.0;
 
-    TIMER_A0->CCTL[1] = TIMER_A0->CCTL[1] ^ 0b1100000000000000;
     TIMER_A0->CCTL[2] = TIMER_A0->CCTL[2] ^ 0b1100000000000000;
+    TIMER_A0->CCTL[3] = TIMER_A0->CCTL[3] ^ 0b1100000000000000;
 
 }

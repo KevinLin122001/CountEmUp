@@ -21,11 +21,6 @@ volatile int currentOccupancy = 0;
 volatile int maxCapacity = 3;
 bool resetted = true;
 
-enum
-{
-    PLAYING, STOP
-} PlayerStatus;
-
 void ConfigureTimers(void)
 {
 
@@ -68,8 +63,6 @@ void main(void)
 
     __enable_irq();
 
-    PlayerStatus = STOP;
-
     while (1)
     {
 
@@ -102,7 +95,7 @@ void directionDetection(void)
     char toPrint[256] = "";
     char toPrint2[256] = "";
     threshold = 100;
-    if (resetted && PlayerStatus == STOP)
+    if (resetted)
     {
         if (distance[0] < threshold && distance[1] >= threshold)
         {
@@ -110,7 +103,17 @@ void directionDetection(void)
             {
                 SpeakerInit();
                 PlayNote(3500);
-                PlayerStatus = PLAYING;
+                char switchValue;
+                switchValue = SwitchPort->IN & Switch; //Retrieves the switch Value
+                while (switchValue == Switch )
+                    {
+                        switchValue = (SwitchPort->IN & Switch );
+                        int x;
+                        for (x = 0; x < 144000; x++)
+                            ; //Lazy debounce
+                    }
+                InputCaptureConfiguration();
+                PlayNote(0x1); //Plays a rest note
             }
             else
             {
@@ -148,24 +151,5 @@ void directionDetection(void)
     lcd_puts(toPrint2);
     printf("\r\n Sensor1 in %4.1f (cm)", distance[0]);
     printf("\r\n Sensor2 in %4.1f (cm)", distance[1]);
-}
-
-void PORT3_IRQHandler(void)
-{
-    char switchValue = SwitchPort->IN & Switch; //Retrieves the switch Value
-    currentOccupancy = 0;
-    if (PlayerStatus == PLAYING) //Starts the Player if its paused
-    {
-        PlayerStatus = STOP;
-        InputCaptureConfiguration();
-        PlayNote(0x1); //Plays a rest note
-    }
-    while (switchValue != Switch )
-    {
-        switchValue = (SwitchPort->IN & Switch );
-        int x;
-        for (x = 0; x < 144000; x++)
-            ; //Lazy debounce
-    }
-    SwitchPort->IFG &= ~(Switch); // Clear Flag
+    printf("\r\n Currect: %d",currentOccupancy);
 }

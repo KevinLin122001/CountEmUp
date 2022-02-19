@@ -14,7 +14,7 @@
 
 #include <msp.h>
 #define SpeakerPort P2
-#define Speaker BIT6  //P2.6
+#define Speaker BIT4  //P2.6
 
 void SpeakerInit(void);
 

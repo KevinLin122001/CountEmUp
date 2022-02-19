@@ -10,7 +10,7 @@
 
 //P2.4
 #define InputCapturePort P2
-#define InputCapturePin BIT4 | BIT5
+#define InputCapturePin BIT5 | BIT6
 
 //P1.0
 #define LED1port P1

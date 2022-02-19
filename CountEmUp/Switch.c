@@ -19,14 +19,6 @@ void SwitchInit(void)
     SwitchPort->OUT |= (Switch);
     //Enables pull resistor
     SwitchPort->REN |= (Switch);
-    //Set interrupt to activate on high-to-low transition
-    SwitchPort->IES |= (Switch);
-
-    //Enable Interrupt
-    SwitchPort->IE |= (Switch);
 
     NVIC->ISER[1] = 1 << (PORT3_IRQn & 5);
-
-    //Clear Interrupt Flags
-    SwitchPort->IFG &= ~(Switch);
 }
