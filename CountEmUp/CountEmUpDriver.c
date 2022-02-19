@@ -2,20 +2,36 @@
 #include "csHFXT.h"
 #include "csLFXT.h"
 #include "HC_SF04InputCapture.h"
+#include "lcd8bits.h"
+#include "Switch.h"
+#include "Speaker.h"
 #include <Math.h>
-#define Frequency20Hz 8192
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdbool.h>
 
+#define FrequencyHz 4096
 
 extern volatile float distance[2];
+extern bool sendReceiveToggle;
+volatile float threshold = 0;
+volatile float maxThreshold = 800;
+volatile int currentOccupancy = 0;
+volatile int maxCapacity = 3;
+bool resetted = true;
+
+enum
+{
+    PLAYING, STOP
+} PlayerStatus;
 
 void ConfigureTimers(void)
 {
 
-
-
-    /* Configure Timer_A1 and CCRs */
+    /* Configure Timer_A2 and CCRs */
     // Set initial period in CCR0 register. This assumes timer starts at 0
-    TIMER_A2->CCR[0] = Frequency20Hz;
+    TIMER_A2->CCR[0] = FrequencyHz;
     // Configure CCR0 for Compare mode with interrupt enabled (no output mode - 0)
     TIMER_A2->CCTL[0] = 0b0000100010010000;
     // Configure Timer_A1 in UP Mode with source ACLK prescale 1:1 and no interrupt
@@ -23,21 +39,9 @@ void ConfigureTimers(void)
 
     /* Configure global interrupts and NVIC */
     // Enable TA1 TA1CCR0 compare interrupt
-    NVIC->ISER[0] |= (1) << TA2_0_IRQn ;
+    NVIC->ISER[0] |= (1) << TA2_0_IRQn;
 
     __enable_irq();
-
-//    /* Configure Timer_A2 and CCRs */
-//    // Set initial period in CCR0 register. This assumes timer starts at 0
-//    TIMER_A2->CCR[0] = Frequency20Hz;
-//    // Configure CCR0 for Compare mode with interrupt enabled (no output mode - 0)
-//    TIMER_A2->CCTL[0] = 0x0010;
-//    // Configure Timer_A2 in UP Mode with source ACLK prescale 1:1 and no interrupt
-//    TIMER_A2->CTL = 0b0000000100010100;  //0x0114
-//
-//    /* Configure global interrupts and NVIC */
-//    // Enable TA2 TA2CCR0 compare interrupt
-//    NVIC->ISER[0] |= (1) << TA2_0_IRQn;
 }
 
 /**
@@ -50,10 +54,26 @@ void main(void)
     configHFXT();
     configLFXT();
     InputCaptureConfiguration();
+    lcd8bits_init();
+    SwitchInit();
     ConfigureTimers();
 
+    int count;
+        for (count = 0; count < 5; count++)
+        {
+            StartHC_SF04Reading();
+            threshold = threshold + distance[0] + distance[1];
+        }
+        threshold /= 10;
 
-    while(1) {}
+    __enable_irq();
+
+    PlayerStatus = STOP;
+
+    while (1)
+    {
+
+    }
 
 }
 
@@ -65,12 +85,87 @@ void TA2_0_IRQHandler(void)
      *  mapped to this interrupt vector     */
     if (TIMER_A2->CCTL[0] & TIMER_A_CCTLN_CCIFG)
     {
-        // TODO clear timer compare flag in TA3CCTL0
+        InputCaptureTriggerPort->OUT |= InputCaptureTrigger; //trigger output pin
+        int count = 0;
+        for (count = 0; count < 500; count++)
+            ;  //10 microsecond minimum trigger pulse
+        //clear output pin to LOW
+        InputCaptureTriggerPort->OUT &= ~InputCaptureTrigger; //trigger output pin
+
         TIMER_A2->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;  //clear interrupt flag
         StartHC_SF04Reading();
-        printf("\r\n Sensor 1 %4.1f (cm)  ", distance[0]);
-        printf("\r\n Sensor 2 %4.1f (cm)  ", distance[1]);
-
-
+        directionDetection();
     }
+}
+void directionDetection(void)
+{
+    char toPrint[256] = "";
+    char toPrint2[256] = "";
+    threshold = 100;
+    if (resetted && PlayerStatus == STOP)
+    {
+        if (distance[0] < threshold && distance[1] >= threshold)
+        {
+            if (currentOccupancy >= maxCapacity)
+            {
+                SpeakerInit();
+                PlayNote(3500);
+                PlayerStatus = PLAYING;
+            }
+            else
+            {
+                currentOccupancy += 1;
+                resetted = false;
+            }
+        }
+        else if (distance[1] < threshold && distance[0] >= threshold)
+        {
+            if (currentOccupancy <= 0)
+            {
+                currentOccupancy = 0;
+            }
+            else
+            {
+                currentOccupancy -= 1;
+            }
+            resetted = false;
+        }
+    }
+    else
+    {
+        if (distance[0] >= threshold && distance[0] <= maxThreshold
+                && distance[1] >= threshold && distance[1] <= maxThreshold)
+        {
+            resetted = true;
+        }
+    }
+    lcd_clear();
+    lcd_SetLineNumber(FirstLine);
+    sprintf(toPrint, "        Current: %d", currentOccupancy);
+    lcd_puts(toPrint);
+    lcd_SetLineNumber(SecondLine);
+    sprintf(toPrint2, "Max Capacity: %d", currentOccupancy);
+    lcd_puts(toPrint2);
+    printf("\r\n Sensor1 in %4.1f (cm)", distance[0]);
+    printf("\r\n Sensor2 in %4.1f (cm)", distance[1]);
+}
+
+void PORT3_IRQHandler(void)
+{
+    char switchValue = SwitchPort->IN & Switch; //Retrieves the switch Value
+    currentOccupancy = 0;
+    if (PlayerStatus == PLAYING) //Starts the Player if its paused
+    {
+        PlayerStatus = STOP;
+        InputCaptureConfiguration();
+        PlayNote(0x1); //Plays a rest note
+    }
+    while (switchValue != Switch )
+    {
+        switchValue = (SwitchPort->IN & Switch );
+        int x;
+        for (x = 0; x < 144000; x++)
+            ; //Lazy debounce
+    }
+    SwitchPort->IFG &= ~(Switch); // Clear Flag
 }

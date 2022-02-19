@@ -7,9 +7,11 @@
 //P1.6
 #define InputCaptureTriggerPort P1
 #define InputCaptureTrigger BIT7
+
 //P2.4
 #define InputCapturePort P2
-#define InputCapturePin BIT4
+#define InputCapturePin BIT4 | BIT5
+
 //P1.0
 #define LED1port P1
 #define LED1Pin BIT0
