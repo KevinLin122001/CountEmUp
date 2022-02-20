@@ -44,7 +44,7 @@ void InputCaptureConfiguration(void)
     TIMER_A0->CCTL[3] = 0b0100000100000000;
 
 }
-
+//Starts the reading for HC_SF04 ultrasonic sonar sensor using TIMER_A0 values to identify the distance between it and it's nearest object
 void StartHC_SF04Reading(void)
 {
     //capture on rising edge first by default

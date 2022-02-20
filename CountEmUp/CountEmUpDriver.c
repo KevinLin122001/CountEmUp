@@ -37,7 +37,7 @@ void ConfigureTimerA2(void)
     // Enable TA2 TA2CCR0 compare interrupt
     NVIC->ISER[0] |= (1) << TA2_0_IRQn;
 
-    __enable_irq();
+    __enable_irq();  //Enable global interrupt
 }
 
 /**
