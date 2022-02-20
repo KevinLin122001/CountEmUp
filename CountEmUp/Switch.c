@@ -1,8 +1,8 @@
 /*
  * Switch.c
- *
- *  Created on: Feb 18, 2022
- *      Author: link
+ * Subroutine file for initializing the switch
+ * Last Edited Date: February 19, 2022
+ * Author: Kevin Lin and Robert Walker
  */
 
 #include <msp.h>

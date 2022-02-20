@@ -1,8 +1,8 @@
 /*
  * Speaker.c
- *
- *  Created on: Feb 18, 2022
- *      Author: link
+ *  Subroutine file for initializing the speaker and playing a note
+ *  Last Edited Date: February 19, 2022
+ *  Author: Kevin Lin and Robert Walker
  */
 #include <msp.h>
 #include "speaker.h"
@@ -17,6 +17,7 @@ void SpeakerInit(void)
     TIMER_A0->CTL = 0x294;
 }
 
+//Plays a note given a frequency
 void PlayNote(unsigned int CurrentNote)
 {
     TIMER_A0->CCR[0] = CurrentNote - 1;
